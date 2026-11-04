@@ -1,15 +1,10 @@
 export const dynamic = "force-dynamic";
 
-import { prisma } from "@/lib/db";
-import { mergeSchoolConfig } from "@/lib/school-config";
+import { getSchoolConfig } from "@/lib/school-settings";
 import { Target, Eye, Building2 } from "lucide-react";
 
 export default async function ProfilPage() {
-  const rows = await prisma.pengaturan.findMany({
-    where: { kategori: { in: ["sekolah", "akademik"] } },
-    select: { kunci: true, nilai: true },
-  });
-  const s = mergeSchoolConfig(rows);
+  const s = await getSchoolConfig();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">

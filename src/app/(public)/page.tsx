@@ -2,31 +2,30 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { mergeSchoolConfig, formatTanggalID } from "@/lib/school-config";
+import { formatTanggalID } from "@/lib/school-config";
+import { getSchoolConfig } from "@/lib/school-settings";
 import { Badge } from "@/components/ui";
 import { Users, UserCog, School, BookMarked, ScanLine, FileText, MonitorPlay, ShieldCheck } from "lucide-react";
 
 export default async function HomePage() {
-  const [rows, berita, jurusan, stat] = await Promise.all([
-    prisma.pengaturan.findMany({
-      where: { kategori: { in: ["sekolah", "akademik"] } },
-      select: { kunci: true, nilai: true },
-    }),
+  const [s, berita, jurusan, stat] = await Promise.all([
+    getSchoolConfig(),
     prisma.berita.findMany({
       where: { status: "publish" },
       orderBy: { publishedAt: "desc" },
       take: 3,
     }),
     prisma.jurusan.findMany({ where: { aktif: true }, orderBy: { kode: "asc" } }),
-    (async () => ({
-      siswa: await prisma.siswa.count({ where: { status: "aktif" } }),
-      guru: await prisma.guru.count({ where: { aktif: true } }),
-      kelas: await prisma.kelas.count({ where: { aktif: true } }),
-      jurusan: await prisma.jurusan.count({ where: { aktif: true } }),
-    }))(),
+    (async () => {
+      const [siswa, guru, kelas, jur] = await Promise.all([
+        prisma.siswa.count({ where: { status: "aktif" } }),
+        prisma.guru.count({ where: { aktif: true } }),
+        prisma.kelas.count({ where: { aktif: true } }),
+        prisma.jurusan.count({ where: { aktif: true } }),
+      ]);
+      return { siswa, guru, kelas, jurusan: jur };
+    })(),
   ]);
-
-  const s = mergeSchoolConfig(rows);
 
   const fitur = [
     { icon: ScanLine, judul: "Absensi QR Code", teks: "Sesi QR valid 15 menit, terikat jadwal & kelas, real-time." },

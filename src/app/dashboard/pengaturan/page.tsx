@@ -2,8 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { Card, PageHeader } from "@/components/ui";
 import { getSessionUser, punyaPermission } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { mergeSchoolConfig } from "@/lib/school-config";
+import { getSchoolConfig } from "@/lib/school-settings";
 import { simpanPengaturan } from "./actions";
 import { PengaturanForm } from "./form";
 
@@ -12,12 +11,7 @@ export default async function PengaturanPage() {
   if (!user) return null;
 
   const boleh = punyaPermission(user, "pengaturan.manage");
-
-  const rows = await prisma.pengaturan.findMany({
-    where: { kategori: { in: ["sekolah", "akademik"] } },
-    select: { kunci: true, nilai: true },
-  });
-  const s = mergeSchoolConfig(rows);
+  const s = await getSchoolConfig();
 
   return (
     <>
