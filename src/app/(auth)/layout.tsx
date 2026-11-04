@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { SCHOOL_DEFAULT } from "@/lib/school-config";
 
