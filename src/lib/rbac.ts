@@ -22,6 +22,12 @@ export const PERMISSIONS: PermissionDef[] = [
   { kode: "guru.update", modul: "guru", aksi: "update", label: "Ubah guru" },
   { kode: "guru.delete", modul: "guru", aksi: "delete", label: "Hapus guru" },
 
+  { kode: "wali.view", modul: "wali", aksi: "view", label: "Akses modul Wali Kelas" },
+  { kode: "wali.catatan", modul: "wali", aksi: "catatan", label: "Isi catatan wali kelas" },
+  { kode: "kesiswaan.view", modul: "kesiswaan", aksi: "view", label: "Akses modul Kesiswaan" },
+  { kode: "kesiswaan.manage", modul: "kesiswaan", aksi: "manage", label: "Kelola izin & kedisiplinan siswa" },
+  { kode: "kaprog.view", modul: "kaprog", aksi: "view", label: "Akses modul Kepala Program" },
+
   { kode: "orangtua.view", modul: "orangtua", aksi: "view", label: "Lihat orang tua" },
   { kode: "orangtua.manage", modul: "orangtua", aksi: "manage", label: "Kelola orang tua" },
 
@@ -155,6 +161,35 @@ export const ROLES: RoleDef[] = [
       "rapor.view", "rapor.manage",
       "cbt.view", "cbt.bank", "cbt.paket", "cbt.monitor",
       "pengumuman.manage", "laporan.export",
+      "wali.view", "wali.catatan",
+    ],
+  },
+  {
+    kode: "wali_kelas",
+    nama: "Wali Kelas",
+    deskripsi: "Membina siswa kelas yang diwalikan, rekap kehadiran, dan catatan wali",
+    permissions: [
+      "dashboard.view", "jadwal.view", "siswa.view", "absensi.view",
+      "nilai.view", "rapor.view", "wali.view", "wali.catatan",
+      "pengumuman.manage", "laporan.export",
+    ],
+  },
+  {
+    kode: "kesiswaan",
+    nama: "Staff Kesiswaan",
+    deskripsi: "Pembinaan siswa, izin/sakit, dan monitoring kedisiplinan",
+    permissions: [
+      "dashboard.view", "siswa.view", "absensi.view", "orangtua.view",
+      "kesiswaan.view", "kesiswaan.manage", "pengumuman.manage", "laporan.export",
+    ],
+  },
+  {
+    kode: "kaprog",
+    nama: "Kepala Program Keahlian",
+    deskripsi: "Monitoring jurusan: kelas, siswa, dan mata pelajaran kejuruan",
+    permissions: [
+      "dashboard.view", "siswa.view", "guru.view", "kelas.view", "mapel.view",
+      "jadwal.view", "nilai.view", "absensi.view", "kaprog.view", "laporan.export",
     ],
   },
   {

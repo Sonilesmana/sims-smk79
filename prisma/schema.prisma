@@ -160,12 +160,13 @@ model Semester {
 
 model Jurusan {
   id       String  @id @default(cuid())
-  kode     String  @unique // AKL, MPLB, TKRO, TKJ
+  kode     String  @unique // AKL, TSM, TKJ
   nama     String
   aktif    Boolean @default(true)
 
   kelas          Kelas[]
   mataPelajaran  MataPelajaran[]
+  kaprogs        Guru[]
 }
 
 model Kelas {
@@ -219,9 +220,11 @@ model Guru {
   telepon       String?
   alamat        String?
   foto          String?
+  kaprogJurusanId String?   // diisi jika guru menjadi Kepala Program Keahlian
   aktif         Boolean  @default(true)
   createdAt     DateTime @default(now())
 
+  kaprogJurusan   Jurusan?      @relation(fields: [kaprogJurusanId], references: [id], onDelete: SetNull)
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   kelasWali       Kelas[]           @relation("WaliKelas")
   tugasMengajar   TugasMengajar[]
@@ -232,6 +235,7 @@ model Guru {
   nilai           Nilai[]
   kelasDiampu     KelasDiampu[]
   penilaianEsai   Jawaban[]         @relation("PenilaiEsai")
+  catatanWali     CatatanWali[]
 }
 
 model Siswa {
@@ -265,6 +269,7 @@ model Siswa {
   jawaban         Jawaban[]
   hasilUjian      HasilUjian[]
   mutasi          MutasiSiswa[]
+  catatanWali     CatatanWali[]
 }
 
 model OrangTua {
@@ -291,6 +296,20 @@ model SiswaOrangTua {
   orangTua OrangTua @relation(fields: [orangTuaId], references: [id], onDelete: Cascade)
 
   @@unique([siswaId, orangTuaId])
+}
+
+// Catatan wali kelas untuk siswa (karakter, sikap, perkembangan)
+model CatatanWali {
+  id        String   @id @default(cuid())
+  siswaId   String
+  guruId    String
+  catatan   String   @db.Text
+  createdAt DateTime @default(now())
+
+  siswa Siswa @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  guru  Guru  @relation(fields: [guruId], references: [id], onDelete: Cascade)
+
+  @@index([siswaId, createdAt])
 }
 
 // Relasi many-to-many guru <-> kelas (selain wali kelas)

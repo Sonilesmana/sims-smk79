@@ -101,22 +101,24 @@ async function main() {
     create: { tahunAjaranId: ta.id, nama: "Genap", aktif: false, urutan: 2 },
   });
 
-  // 5. Jurusan
+  // 5. Jurusan — 3 program keahlian: AKL, TSM, TKJ
   const jurusanDef = [
     { kode: "AKL", nama: "Akuntansi dan Keuangan Lembaga" },
-    { kode: "MPLB", nama: "Manajemen Perkantoran dan Layanan Bisnis" },
-    { kode: "TKRO", nama: "Teknik Kendaraan Ringan Otomotif" },
+    { kode: "TSM", nama: "Teknik Sepeda Motor" },
     { kode: "TKJ", nama: "Teknik Komputer dan Jaringan" },
   ];
   const jurusanMap = new Map<string, string>();
   for (const j of jurusanDef) {
     const row = await prisma.jurusan.upsert({
       where: { kode: j.kode },
-      update: { nama: j.nama },
+      update: { nama: j.nama, aktif: true },
       create: { kode: j.kode, nama: j.nama },
     });
     jurusanMap.set(j.kode, row.id);
   }
+
+  // Jurusan lama yang sudah tidak dipakai — hapus agar tersisa 3
+  await prisma.jurusan.deleteMany({ where: { kode: { in: ["MPLB", "TKRO"] } } });
 
   // 6. Mata pelajaran
   const mapelDef = [
@@ -129,8 +131,7 @@ async function main() {
     { kode: "SEJ", nama: "Sejarah Indonesia", kelompok: "umum" },
     { kode: "INF", nama: "Informatika", kelompok: "umum" },
     { kode: "AKL-DAS", nama: "Dasar-dasar Akuntansi dan Keuangan Lembaga", kelompok: "kejuruan" },
-    { kode: "MPLB-DAS", nama: "Dasar-dasar Manajemen Perkantoran", kelompok: "kejuruan" },
-    { kode: "TKRO-DAS", nama: "Dasar-dasar Teknik Otomotif", kelompok: "kejuruan" },
+    { kode: "TSM-DAS", nama: "Dasar-dasar Teknik Sepeda Motor", kelompok: "kejuruan" },
     { kode: "TKJ-DAS", nama: "Dasar-dasar Teknik Jaringan Komputer dan Telekomunikasi", kelompok: "kejuruan" },
     { kode: "PKK", nama: "Projek Kreatif dan Kewirausahaan", kelompok: "kejuruan" },
   ];
@@ -143,6 +144,8 @@ async function main() {
     });
     mapelMap.set(m.kode, row.id);
   }
+  // Mapel lama yang sudah dihapus — bersihkan
+  await prisma.mataPelajaran.deleteMany({ where: { kode: { in: ["MPLB-DAS", "TKRO-DAS"] } } });
 
   // 7. Akun + profil tiap role
   type AkunDef = {
@@ -161,6 +164,8 @@ async function main() {
     { username: "keuangan", nama: "Bendahara Sekolah", role: "keuangan" },
     { username: "cbt", nama: "Admin CBT", role: "cbt" },
     { username: "guru", nama: "Budi Santoso, S.Kom.", role: "guru", guru: { nip: "198501012010011003", jenisKelamin: "L" } },
+    { username: "kaprog", nama: "Asep Sudrajat, S.T.", role: "kaprog", guru: { nip: "199001012015041001", jenisKelamin: "L" } },
+    { username: "kesiswaan", nama: "Rangga Wijaya, S.Pd. (Kesiswaan)", role: "kesiswaan" },
     { username: "siswa", nama: "Ahmad Fauzi", role: "siswa", siswa: { nis: "2425001", kelasKode: "X TKJ 1", jenisKelamin: "L" } },
     { username: "orangtua", nama: "Sutrisno (Wali Ahmad)", role: "orang_tua", ortu: { telepon: "081200000001" } },
   ];
@@ -168,6 +173,7 @@ async function main() {
   const kelasDef = [
     { nama: "X TKJ 1", tingkat: "X", kode: "TKJ" },
     { nama: "X AKL 1", tingkat: "X", kode: "AKL" },
+    { nama: "X TSM 1", tingkat: "X", kode: "TSM" },
     { nama: "XI TKJ 1", tingkat: "XI", kode: "TKJ" },
     { nama: "XII TKJ 1", tingkat: "XII", kode: "TKJ" },
   ];
@@ -225,6 +231,27 @@ async function main() {
     }
   }
 
+  // Tetapkan Kaprog TKJ: Asep Sudrajat
+  const kaprogUser = await prisma.user.findUnique({ where: { username: "kaprog" } });
+  if (kaprogUser) {
+    await prisma.guru.update({
+      where: { userId: kaprogUser.id },
+      data: { kaprogJurusanId: jurusanMap.get("TKJ") },
+    });
+  }
+
+  // Wali kelas X TKJ 1: Budi Santoso
+  const guruUser = await prisma.user.findUnique({ where: { username: "guru" } });
+  if (guruUser) {
+    const wali = await prisma.guru.findUnique({ where: { userId: guruUser.id } });
+    if (wali) {
+      await prisma.kelas.updateMany({
+        where: { nama: "X TKJ 1", tahunAjaranId: ta.id },
+        data: { waliKelasId: wali.id },
+      });
+    }
+  }
+
   // kelas sisanya
   for (const def of kelasDef) {
     await prisma.kelas.upsert({
@@ -257,6 +284,7 @@ async function main() {
     { nis: "2425002", nama: "Dewi Lestari", kelas: "X TKJ 1", jk: "P" },
     { nis: "2425003", nama: "Rizky Pratama", kelas: "X TKJ 1", jk: "L" },
     { nis: "2425004", nama: "Nurhaliza Putri", kelas: "X AKL 1", jk: "P" },
+    { nis: "2425005", nama: "Rangga Saputra", kelas: "X TSM 1", jk: "L" },
     { nis: "2325001", nama: "Fajar Nugraha", kelas: "XI TKJ 1", jk: "L" },
     { nis: "2225001", nama: "Intan Permata", kelas: "XII TKJ 1", jk: "P" },
   ];
@@ -345,7 +373,7 @@ async function main() {
 
   console.log("Seed selesai.");
   console.log(`Akun demo (password sama untuk semua): ${DEMO_PASSWORD}`);
-  console.log("admin / kepsek / kurikulum / tu / keuangan / cbt / guru / siswa / orangtua");
+  console.log("admin / kepsek / kurikulum / tu / keuangan / cbt / guru / kaprog / kesiswaan / siswa / orangtua");
 }
 
 main()

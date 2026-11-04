@@ -29,6 +29,14 @@ export const MENU: MenuGroup[] = [
     ],
   },
   {
+    judul: "Jabatan & Wali",
+    items: [
+      { label: "Wali Kelas", href: "/dashboard/wali-kelas", icon: "BookOpenCheck", permission: "wali.view" },
+      { label: "Kesiswaan", href: "/dashboard/kesiswaan", icon: "ShieldCheck", permission: "kesiswaan.view" },
+      { label: "Kaprog", href: "/dashboard/kaprog", icon: "Briefcase", permission: "kaprog.view" },
+    ],
+  },
+  {
     judul: "CBT",
     items: [
       { label: "Bank Soal", href: "/dashboard/cbt/bank", icon: "Database", permission: "cbt.bank" },

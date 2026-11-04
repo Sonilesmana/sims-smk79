@@ -47,7 +47,9 @@ Semua akun memakai password yang sama: **`Admin#12345`**
 | Staff Tata Usaha | `tu` | Data induk, surat, arsip, PPDB |
 | Staff Keuangan | `keuangan` | Tagihan, pembayaran, laporan |
 | Admin CBT | `cbt` | Bank soal, paket ujian |
-| Guru | `guru` | Absensi, nilai, materi, CBT |
+| Guru | `guru` | Absensi, nilai, materi, CBT (juga menjadi Wali Kelas X TKJ 1) |
+| Kaprog (TKJ) | `kaprog` | Monitoring jurusan TKJ |
+| Kesiswaan | `kesiswaan` | Izin/sakit, kedisiplinan siswa |
 | Siswa | `siswa` | Jadwal, absensi, nilai, tagihan |
 | Orang Tua | `orangtua` | Monitoring anak |
 
