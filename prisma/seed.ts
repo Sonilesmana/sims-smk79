@@ -15,7 +15,8 @@ import { PERMISSIONS, ROLES } from "../src/lib/rbac";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-const DEMO_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "Admin#12345";
+// Password fallback hanya untuk pengembangan lokal; di produksi selalu set SEED_ADMIN_PASSWORD.
+const DEMO_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "ChangeMe!2026";
 
 function qrToken() {
   return "QR" + randomBytes(8).toString("hex").toUpperCase();
@@ -276,6 +277,43 @@ async function main() {
         update: { hubungan: "wali", utama: true },
         create: { siswaId: siswaRows[0].id, orangTuaId: ortu.id, hubungan: "wali", utama: true },
       });
+    }
+  }
+
+  // 8a. Contoh jadwal agar modul absensi bisa langsung diuji
+  const guruUserJadwal = await prisma.user.findUnique({ where: { username: "guru" } });
+  const guruRef = guruUserJadwal
+    ? await prisma.guru.findUnique({ where: { userId: guruUserJadwal.id } })
+    : null;
+  const kelasXJad = await prisma.kelas.findUnique({
+    where: { nama_tahunAjaranId: { nama: "X TKJ 1", tahunAjaranId: ta.id } },
+  });
+  if (guruRef && kelasXJad && mapelMap.get("INF")) {
+    const mapelInf = mapelMap.get("INF")!;
+    for (let hari = 1; hari <= 6; hari++) {
+      const ada = await prisma.jadwal.findFirst({
+        where: {
+          guruId: guruRef.id,
+          kelasId: kelasXJad.id,
+          mataPelajaranId: mapelInf,
+          hari,
+        },
+      });
+      if (!ada) {
+        await prisma.jadwal.create({
+          data: {
+            kelasId: kelasXJad.id,
+            mataPelajaranId: mapelInf,
+            guruId: guruRef.id,
+            tahunAjaranId: ta.id,
+            semesterId: semGanjil.id,
+            hari,
+            jamMulai: "07:00",
+            jamSelesai: "08:30",
+            ruang: "Lab Komputer 1",
+          },
+        });
+      }
     }
   }
 

@@ -270,6 +270,7 @@ model Siswa {
   hasilUjian      HasilUjian[]
   mutasi          MutasiSiswa[]
   catatanWali     CatatanWali[]
+  koreksiAbsensi  KoreksiAbsensi[]
 }
 
 model OrangTua {
@@ -429,7 +430,7 @@ model SesiAbsen {
   jadwalId     String?
   kelasId      String
   guruId       String
-  tokenHash    String // token QR disimpan ter-hash
+  token        String   @unique // token QR (dipakai scan via URL)
   metode       String   @default("qr_guru") // qr_guru = guru tampilkan QR; qr_siswa = guru scan kartu
   tanggal      DateTime @default(now())
   jamBuka      DateTime @default(now())
@@ -442,6 +443,7 @@ model SesiAbsen {
   kelas    Kelas    @relation(fields: [kelasId], references: [id], onDelete: Cascade)
   guru     Guru     @relation(fields: [guruId], references: [id], onDelete: Cascade)
   absensi  Absensi[]
+  koreksi  KoreksiAbsensi[]
 
   @@index([kelasId, tanggal])
   @@index([status])
@@ -461,6 +463,7 @@ model Absensi {
 
   sesi  SesiAbsen @relation(fields: [sesiId], references: [id], onDelete: Cascade)
   siswa Siswa     @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  koreksi KoreksiAbsensi[]
 
   @@unique([sesiId, siswaId]) // cegah scan ganda
   @@index([siswaId, waktuScan])
@@ -496,6 +499,13 @@ model KoreksiAbsensi {
   status       String   @default("menunggu")
   disetujuiOleh String?
   createdAt    DateTime @default(now())
+
+  absensi Absensi?  @relation(fields: [absensiId], references: [id], onDelete: SetNull)
+  siswa   Siswa     @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  sesi    SesiAbsen? @relation(fields: [sesiId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([sesiId])
 }
 
 // ============================================================

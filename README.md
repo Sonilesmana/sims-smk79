@@ -37,7 +37,9 @@ Buka <http://localhost:3000>.
 
 ### Akun Demo
 
-Semua akun memakai password yang sama: **`Admin#12345`**
+Semua akun demo memakai satu password yang **tidak dipublikasikan di repositori ini**
+(disampaikan secara pribadi oleh pengelola; diatur lewat `SEED_ADMIN_PASSWORD` saat seed).
+Untuk penggunaan produksi, ganti password setiap akun setelah login pertama.
 
 | Peran | Username | Keterangan |
 | --- | --- | --- |

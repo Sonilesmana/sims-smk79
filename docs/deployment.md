@@ -61,7 +61,10 @@ npm run dev
 
 > **Jangan pernah commit file `.env`.** `.gitignore` sudah mengecualikannya.
 
-## Akun Demo (password: `Admin#12345`)
+## Akun Demo
+
+Password tidak dipublikasikan di repositori ini. Diatur lewat `SEED_ADMIN_PASSWORD` saat
+seed, atau hubungi pengelola aplikasi. Ganti password setiap akun setelah login pertama.
 
 `admin`, `kepsek`, `kurikulum`, `tu`, `keuangan`, `cbt`, `guru`, `siswa` (NIS 2425001),
 `orangtua` (lihat README).
